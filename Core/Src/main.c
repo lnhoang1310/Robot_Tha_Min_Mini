@@ -237,32 +237,13 @@ int main(void)
 	  num_mine = NUM_MAX_MINE - (uint16_t)(sensor.distance_cm / SIZE_MINE);
 	  if(num_mine < 0) num_mine = 0;
 	  if(num_mine > 0 && flag_mine_laying){
-		  switch(type){
-			  case LAND_MINE:
-				  if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-					  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-					  HAL_Delay(500);
-				  }
-				  if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-					  Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
-					  time_servo = HAL_GetTick();
-				  }
-				  break;
-			  case TANK_MINE:
-//				  if(servo_tank_mine_push.Angle == PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
-//					  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  HAL_Delay(500);
-//				  }
-//				  if(servo_tank_mine_push.Angle != PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
-//					  Servo_Set(&servo_tank_mine_push, PUSH_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  HAL_Delay(2000);
-//					  Servo_Set(&servo_tank_mine_left_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  Servo_Set(&servo_tank_mine_right_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-//					  time_servo = HAL_GetTick();
-//				  }
-				  break;
+		if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
+			  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+			  HAL_Delay(500);
+		  }
+		  if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
+			  Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
+			  time_servo = HAL_GetTick();
 		  }
 		  flag_mine_laying = 0;
 	  }

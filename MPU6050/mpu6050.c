@@ -3,7 +3,7 @@
 #include "robot.h"
 
 #define PI 3.141592653589793
-#define NUM_SAMPLE_CALIB 20000
+#define NUM_SAMPLE_CALIB 200
 #define MPU6050_ADDR 0xD0
 const uint16_t i2c_timeout = 5;
 const double Accel_Z_corrector = 14418.0;
