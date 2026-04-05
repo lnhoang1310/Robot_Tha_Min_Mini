@@ -221,9 +221,6 @@ int main(void)
 	}
 	
 	Servo_Init(&servo_land_mine, &htim3, TIM_CHANNEL_1, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-	Servo_Init(&servo_tank_mine_push, &htim3, TIM_CHANNEL_2, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-	Servo_Init(&servo_tank_mine_left_door, &htim3, TIM_CHANNEL_3, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-	Servo_Init(&servo_tank_mine_right_door, &htim3, TIM_CHANNEL_4, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
 	
 	HAL_TIM_Base_Start_IT(&htim3);
 	HAL_UART_Receive_IT(&huart3, &data_rx, 1);
@@ -254,19 +251,19 @@ int main(void)
 				  }
 				  break;
 			  case TANK_MINE:
-				  if(servo_tank_mine_push.Angle == PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
-					  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-					  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-					  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-					  HAL_Delay(500);
-				  }
-				  if(servo_tank_mine_push.Angle != PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
-					  Servo_Set(&servo_tank_mine_push, PUSH_POSITION_ANGLE_TYPE_TANK_MINE);
-					  HAL_Delay(2000);
-					  Servo_Set(&servo_tank_mine_left_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-					  Servo_Set(&servo_tank_mine_right_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-					  time_servo = HAL_GetTick();
-				  }
+//				  if(servo_tank_mine_push.Angle == PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
+//					  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  HAL_Delay(500);
+//				  }
+//				  if(servo_tank_mine_push.Angle != PUSH_POSITION_ANGLE_TYPE_TANK_MINE){
+//					  Servo_Set(&servo_tank_mine_push, PUSH_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  HAL_Delay(2000);
+//					  Servo_Set(&servo_tank_mine_left_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  Servo_Set(&servo_tank_mine_right_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//					  time_servo = HAL_GetTick();
+//				  }
 				  break;
 		  }
 		  flag_mine_laying = 0;
@@ -274,9 +271,9 @@ int main(void)
 	  
 	  if(!flag_mine_laying && HAL_GetTick() - time_servo >= 2000){
 		  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-		  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-		  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-		  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//		  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
+//		  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+//		  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
 	  }	  
     /* USER CODE END WHILE */
 
@@ -493,19 +490,24 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
+  htim3.Init.Prescaler = 7199;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 499;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -515,30 +517,9 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-  HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -554,24 +535,19 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM4_Init 1 */
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 7199;
+  htim4.Init.Prescaler = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 499;
+  htim4.Init.Period = 0xffff;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -581,9 +557,18 @@ static void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM4_Init 2 */
 
   /* USER CODE END TIM4_Init 2 */
+  HAL_TIM_MspPostInit(&htim4);
 
 }
 
@@ -724,10 +709,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, STEP_RIGHT_DIR_Pin|AS5600_RIGHT_SCL_Pin|AS5600_RIGHT_SDA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, STEP_LEFT_DIR_Pin|STEP_LEFT_EN_Pin|VL53L0X_SDA_Pin|VL53L0X_XHSUT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, STEP_LEFT_DIR_Pin|VL53L0X_SDA_Pin|VL53L0X_XHSUT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, AS5600_LEFT_SCL_Pin|AS5600_LEFT_SDA_Pin|VL53L0X_SCL_Pin|STEP_RIGHT_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, STEP_LEFT_EN_Pin|AS5600_LEFT_SCL_Pin|AS5600_LEFT_SDA_Pin|VL53L0X_SCL_Pin
+                          |STEP_RIGHT_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : STEP_RIGHT_DIR_Pin */
   GPIO_InitStruct.Pin = STEP_RIGHT_DIR_Pin;
@@ -743,12 +729,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : STEP_LEFT_DIR_Pin STEP_LEFT_EN_Pin VL53L0X_XHSUT_Pin */
-  GPIO_InitStruct.Pin = STEP_LEFT_DIR_Pin|STEP_LEFT_EN_Pin|VL53L0X_XHSUT_Pin;
+  /*Configure GPIO pins : STEP_LEFT_DIR_Pin VL53L0X_XHSUT_Pin */
+  GPIO_InitStruct.Pin = STEP_LEFT_DIR_Pin|VL53L0X_XHSUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : STEP_LEFT_EN_Pin STEP_RIGHT_EN_Pin */
+  GPIO_InitStruct.Pin = STEP_LEFT_EN_Pin|STEP_RIGHT_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : AS5600_LEFT_SCL_Pin AS5600_LEFT_SDA_Pin VL53L0X_SCL_Pin */
   GPIO_InitStruct.Pin = AS5600_LEFT_SCL_Pin|AS5600_LEFT_SDA_Pin|VL53L0X_SCL_Pin;
@@ -763,13 +756,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(VL53L0X_SDA_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : STEP_RIGHT_EN_Pin */
-  GPIO_InitStruct.Pin = STEP_RIGHT_EN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(STEP_RIGHT_EN_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
