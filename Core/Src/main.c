@@ -122,7 +122,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 		}
 		robot.motorLeft->velocity = 0;
 		robot.motorRight->velocity = 0;
-		transmit("%.2f %.2f %.2f %d", robot.motorLeft->velocity, robot.motorRight->velocity, mpu.Yaw, num_mine);
+		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, mpu.Yaw, num_mine);
 	}
 }
 

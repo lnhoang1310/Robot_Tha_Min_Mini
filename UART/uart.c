@@ -49,6 +49,7 @@ void uart_handle(Robot_Typedef* robot, uint8_t* flag_mine_laying, Mine_Type* typ
 			argv[argv_index++] = token;
 			token = strtok(NULL, " ");
 		}
+		argv[argv_index] = "0";
 		if(!response_uart(argv, &speed_left, &speed_right, &state_robot)) return;
 		if(argv[2][0] == '1') *flag_mine_laying = 1;
 		if(argv[3][0] == '0') *type = LAND_MINE;
