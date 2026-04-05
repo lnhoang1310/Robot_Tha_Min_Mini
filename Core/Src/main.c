@@ -174,9 +174,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_TIM4_Init();
   MX_TIM1_Init();
-  /* USER CODE BEGIN 2 */
-	//HAL_Delay(30000);
-	
+  /* USER CODE BEGIN 2 */	
 	if(Robot_Init(&robot, &huart2, &htim2, TIM_CHANNEL_2, &huart3, &htim1, TIM_CHANNEL_4) != HAL_OK){
 		transmit("Robot Init Fail");
 		error = 5;
@@ -220,7 +218,7 @@ int main(void)
 		Error_Handler();
 	}
 	
-	Servo_Init(&servo_land_mine, &htim3, TIM_CHANNEL_1, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+	Servo_Init(&servo_land_mine, &htim4, TIM_CHANNEL_3, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
 	
 	HAL_TIM_Base_Start_IT(&htim3);
 	HAL_UART_Receive_IT(&huart3, &data_rx, 1);
