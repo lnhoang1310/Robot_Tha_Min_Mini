@@ -34,3 +34,4 @@ robot_tha_min_mini\uart.o: ../TMC2209_Step_Driver/tmc2209.h
 robot_tha_min_mini\uart.o: ../Core/Inc/main.h
 robot_tha_min_mini\uart.o: ..\UART\response.h
 robot_tha_min_mini\uart.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+robot_tha_min_mini\uart.o: ../Servo_Lib/Servo.h

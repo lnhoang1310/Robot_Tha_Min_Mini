@@ -98,7 +98,7 @@ int8_t num_mine = 0;
 uint8_t data_rx = 0;
 uint8_t flag_mine_laying = 0;
 Mine_Type type = LAND_MINE;
-uint32_t time_servo = 0;
+
 char buffer[BUFFER_MESSAGE_SIZE];
 
 HAL_StatusTypeDef transmit(const char *format, ...){
@@ -116,13 +116,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 //			return;
 //		}
 		
-		if(MPU6050_Read_All_Fast(&mpu) != MPU6050_OK){
-			transmit("IMU Error");
-			return;
-		}
+//		if(MPU6050_Read_All_Fast(&mpu) != MPU6050_OK){
+//			transmit("IMU Error");
+//			return;
+//		}
 		robot.motorLeft->velocity = 0;
 		robot.motorRight->velocity = 0;
-		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, mpu.Yaw, num_mine);
+		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, 0, num_mine);
 	}
 }
 
@@ -181,18 +181,18 @@ int main(void)
 		Error_Handler();
 	}
 	
-	if(MPU6050_Init(&mpu, &hi2c1) != MPU6050_OK){
-		error = 1;
-		transmit("IMU Init Fail");
-		Error_Handler();
-	}
-	
-	if(MPU6050_Read_All_Fast(&mpu) != MPU6050_OK){
-		error = 2;
-		transmit("IMU Get Data Fail");
-		Error_Handler();
-	}
-  
+//	if(MPU6050_Init(&mpu, &hi2c1) != MPU6050_OK){
+//		error = 1;
+//		transmit("IMU Init Fail");
+//		Error_Handler();
+//	}
+//	
+//	if(MPU6050_Read_All_Fast(&mpu) != MPU6050_OK){
+//		error = 2;
+//		transmit("IMU Get Data Fail");
+//		Error_Handler();
+//	}
+//  
 //	if(IMU_Init(&bno055, &hi2c1, IMU_ADDRESS) != IMU_OK){
 //		transmit("IMU Init Fail!!");
 //		error = 1;
@@ -235,25 +235,22 @@ int main(void)
 		  Error_Handler();
 	  }
 	  num_mine = NUM_MAX_MINE - (uint16_t)(sensor.distance_cm / SIZE_MINE);
-	  if(num_mine < 0) num_mine = 0;
-	  if(num_mine > 0 && flag_mine_laying){
-		if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-			  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-			  HAL_Delay(500);
-		  }
-		  if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-			  Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
-			  time_servo = HAL_GetTick();
-		  }
-		  flag_mine_laying = 0;
-	  }
-	  
-	  if(!flag_mine_laying && HAL_GetTick() - time_servo >= 2000){
-		  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-//		  Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
-//		  Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-//		  Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
-	  }	  
+//	  if(num_mine < 0) num_mine = 0;
+//	  if(num_mine > 0 && flag_mine_laying){
+//		if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
+//			  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+//			  HAL_Delay(500);
+//		  }
+//		  if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
+//			  Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
+//			  time_servo = HAL_GetTick();
+//		  }
+//		  flag_mine_laying = 0;
+//	  }
+//	  
+//	  if(!flag_mine_laying && servo_land_mine.Angle != IDLE_POSITION_ANGLE_TYPE_LAND_MINE && HAL_GetTick() - time_servo >= 2000){
+//		  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+//	  }	  
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
