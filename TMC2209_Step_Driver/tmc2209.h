@@ -14,7 +14,7 @@ extern "C" {
 #define TMC2209_REG_CHOPCONF      0x6C
 #define TMC2209_REG_PWMCONF       0x70
 
-#define MAX_RPM 300
+#define MAX_RPM 250
 
 typedef enum {
     TMC2209_DIR_FORWARD = 0,

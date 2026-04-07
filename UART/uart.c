@@ -14,7 +14,7 @@ float vel_left = 0;
 float vel_right = 0;
 HAL_StatusTypeDef status = HAL_OK;
 uint32_t time_servo = 0;
-extern int8_t num_mine;
+extern uint8_t num_mine;
 
 static float map(float x, float a, float b){
 	return x * (b / a);
@@ -60,7 +60,6 @@ void uart_handle(Robot_Typedef* robot, uint8_t* flag_mine_laying, Mine_Type* typ
 		if(!state_robot){
 			robot->status = ROBOT_STOP;
 			Robot_Control(robot, 0, 0);
-			return;
 		}else robot->status = ROBOT_RUN;
 		
 		vel_left = map(speed_left, 100, MAX_RPM);
@@ -68,13 +67,13 @@ void uart_handle(Robot_Typedef* robot, uint8_t* flag_mine_laying, Mine_Type* typ
 		status = Robot_Control(robot, vel_left, vel_right);
 		
 		if(*flag_mine_laying){
-			if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
+			if(num_mine > 0 && servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
 				Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
 				time_servo = HAL_GetTick();
 			}
 		}
 	}
-	if(servo_land_mine.Angle != IDLE_POSITION_ANGLE_TYPE_LAND_MINE && HAL_GetTick() - time_servo >= 500){
+	if(servo_land_mine.Angle != IDLE_POSITION_ANGLE_TYPE_LAND_MINE && HAL_GetTick() - time_servo >= 1000){
 		Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
 	}
 }

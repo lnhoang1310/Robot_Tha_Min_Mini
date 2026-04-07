@@ -94,7 +94,7 @@ static void MX_TIM1_Init(void);
 /* USER CODE BEGIN 0 */
 uint8_t error = 0;
 float distance = 0;
-int8_t num_mine = 0;
+uint8_t num_mine = 0;
 uint8_t data_rx = 0;
 uint8_t flag_mine_laying = 0;
 Mine_Type type = LAND_MINE;
@@ -111,18 +111,9 @@ HAL_StatusTypeDef transmit(const char *format, ...){
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 	if(htim->Instance == htim3.Instance){
-//		if(IMU_GetDataRaw(&bno055) != IMU_OK){
-//			transmit("IMU ERROR");
-//			return;
-//		}
-		
-//		if(MPU6050_Read_All_Fast(&mpu) != MPU6050_OK){
-//			transmit("IMU Error");
-//			return;
-//		}
 		robot.motorLeft->velocity = 0;
 		robot.motorRight->velocity = 0;
-		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, 0, num_mine);
+		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, 0.0f, num_mine);
 	}
 }
 
@@ -234,7 +225,8 @@ int main(void)
 		  transmit("Distance Sensor Error");
 		  Error_Handler();
 	  }
-	  num_mine = NUM_MAX_MINE - (uint16_t)(sensor.distance_cm / SIZE_MINE);
+	  int8_t temp = NUM_MAX_MINE - (int16_t)(sensor.distance_cm / SIZE_MINE);
+	  num_mine = (temp > 0) ? temp : 0;
 //	  if(num_mine < 0) num_mine = 0;
 //	  if(num_mine > 0 && flag_mine_laying){
 //		if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
