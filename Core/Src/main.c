@@ -110,7 +110,7 @@ HAL_StatusTypeDef transmit(const char *format, ...){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
-	if(htim->Instance == htim3.Instance){
+	if(htim->Instance == htim4.Instance){
 		robot.motorLeft->velocity = 0;
 		robot.motorRight->velocity = 0;
 		transmit("%.2f %.2f %.2f %d\n", robot.motorLeft->velocity, robot.motorRight->velocity, 0.0f, num_mine);
@@ -209,9 +209,11 @@ int main(void)
 		Error_Handler();
 	}
 	
-	Servo_Init(&servo_land_mine, &htim4, TIM_CHANNEL_3, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+	Servo_Init(&servo_tank_mine_push, &htim3, TIM_CHANNEL_1, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
+	Servo_Init(&servo_tank_mine_left_door, &htim3, TIM_CHANNEL_2, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+	Servo_Init(&servo_tank_mine_right_door, &htim3, TIM_CHANNEL_3, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
 	
-	HAL_TIM_Base_Start_IT(&htim3);
+	HAL_TIM_Base_Start_IT(&htim4);
 	HAL_UART_Receive_IT(&huart3, &data_rx, 1);
   /* USER CODE END 2 */
 
@@ -226,23 +228,7 @@ int main(void)
 		  Error_Handler();
 	  }
 	  int8_t temp = NUM_MAX_MINE - (int16_t)(sensor.distance_cm / SIZE_MINE);
-	  num_mine = (temp > 0) ? temp : 0;
-//	  if(num_mine < 0) num_mine = 0;
-//	  if(num_mine > 0 && flag_mine_laying){
-//		if(servo_land_mine.Angle == PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-//			  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-//			  HAL_Delay(500);
-//		  }
-//		  if(servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-//			  Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
-//			  time_servo = HAL_GetTick();
-//		  }
-//		  flag_mine_laying = 0;
-//	  }
-//	  
-//	  if(!flag_mine_laying && servo_land_mine.Angle != IDLE_POSITION_ANGLE_TYPE_LAND_MINE && HAL_GetTick() - time_servo >= 2000){
-//		  Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
-//	  }	  
+	  num_mine = (temp > 0) ? temp : 0; 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -448,24 +434,19 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 7199;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 499;
+  htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -475,9 +456,26 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -493,19 +491,24 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM4_Init 1 */
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 0;
+  htim4.Init.Prescaler = 7199;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 0xffff;
+  htim4.Init.Period = 499;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -515,18 +518,9 @@ static void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM4_Init 2 */
 
   /* USER CODE END TIM4_Init 2 */
-  HAL_TIM_MspPostInit(&htim4);
 
 }
 

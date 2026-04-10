@@ -5,6 +5,9 @@
 #include "Servo.h"
 
 extern Servo_TypeDef servo_land_mine;
+extern Servo_TypeDef servo_tank_mine_push;
+extern Servo_TypeDef servo_tank_mine_left_door;
+extern Servo_TypeDef servo_tank_mine_right_door;
 uint8_t uart_buffer[UART_BUFFER_SIZE];
 uint8_t uart_flag_cplt = 0;
 uint16_t buffer_index = 0;
@@ -67,13 +70,25 @@ void uart_handle(Robot_Typedef* robot, uint8_t* flag_mine_laying, Mine_Type* typ
 		status = Robot_Control(robot, vel_left, vel_right);
 		
 		if(*flag_mine_laying){
-			if(num_mine > 0 && servo_land_mine.Angle != PUSH_POSITION_ANGLE_TYPE_LAND_MINE){
-				Servo_Set(&servo_land_mine, PUSH_POSITION_ANGLE_TYPE_LAND_MINE);
+			if(num_mine > 0){
+				if(servo_tank_mine_push.Angle != IDLE_POSITION_ANGLE_TYPE_TANK_MINE) Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_TANK_MINE);
+				if(servo_tank_mine_left_door.Angle != CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE) Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+				if(servo_tank_mine_right_door.Angle != CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE) Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+				
+				Servo_Set(&servo_tank_mine_push, PUSH_POSITION_ANGLE_TYPE_TANK_MINE);
 				time_servo = HAL_GetTick();
 			}
 		}
 	}
-	if(servo_land_mine.Angle != IDLE_POSITION_ANGLE_TYPE_LAND_MINE && HAL_GetTick() - time_servo >= 1000){
-		Servo_Set(&servo_land_mine, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+	if(servo_tank_mine_push.Angle != IDLE_POSITION_ANGLE_TYPE_TANK_MINE && HAL_GetTick() - time_servo >= 1000){
+		Servo_Set(&servo_tank_mine_push, IDLE_POSITION_ANGLE_TYPE_LAND_MINE);
+		Servo_Set(&servo_tank_mine_left_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+		Servo_Set(&servo_tank_mine_right_door, OPEN_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+		time_servo = HAL_GetTick();
+	}
+	
+	if((servo_tank_mine_left_door.Angle != CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE || servo_tank_mine_right_door.Angle!= CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE) && HAL_GetTick() - time_servo >= 1000){
+		Servo_Set(&servo_tank_mine_left_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
+		Servo_Set(&servo_tank_mine_right_door, CLOSE_DOOR_POSITION_ANGLE_TYPE_TANK_MINE);
 	}
 }
